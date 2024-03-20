@@ -160,14 +160,3 @@ data "template_file" "script" {
   template = "${file("script.ps1")}"
 }
 
-# Upload a file to the Storage Account
-resource "azurerm_storage_blob" "blob" {
-  name                   = var.blob_name
-  storage_account_name   = azurerm_storage_account.storageacc.name
-  storage_container_name = azurerm_storage_container.storagecontainer.name
-  type                   = "Block"
-
-  source = "D:/test/test.txt" # Specify the local path to the file you want to upload
-
-}
-
