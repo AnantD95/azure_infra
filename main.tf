@@ -139,14 +139,25 @@ resource "azurerm_virtual_machine" "vm" {
     provision_vm_agent        = true
   }
  
-  # Use provisioner to execute a script on the VM to download the files
-  provisioner "remote-exec" {
-    inline = [
-      # "Invoke-WebRequest -Uri 'https://${azurerm_storage_account.storageacc.name}.blob.core.windows.net/${azurerm_storage_container.storagecontainer.name}/${azurerm_storage_blob.blob.name}${var.sas_token}' -OutFile 'C:\temp'"
-        "Invoke-Webrequest -Uri 'https://downlaodfilestorage.blob.core.windows.net/downloadcontainerfile/downloadblobfile?sp=r&st=2024-03-20T09:45:03Z&se=2024-03-20T17:45:03Z&sv=2022-11-02&sr=b&sig=bEoP%2FBXfO68of8zE%2Bda3wInWE9fAVvB1vrUfJGMmTQE%3D' -OutFile 'C:\temp'"                       
-    
-    ]
+}
+
+# Create an Azure VM extension to run PowerShell script
+resource "azurerm_virtual_machine_extension" "script_extension" {
+  name                 = "install-iis"
+  virtual_machine_id   = azurerm_virtual_machine.vm.id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.10"
+
+  protected_settings = <<SETTINGS
+  {
+    "commandToExecute": "powershell -command \"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${base64encode(data.template_file.script.rendered)}')) | Out-File -filepath script.ps1\" && powershell -ExecutionPolicy Unrestricted -File script.ps1 -verb runas"
   }
+  SETTINGS
+}
+
+data "template_file" "script" {
+  template = "${file("script.ps1")}"
 }
 
 # Upload a file to the Storage Account
