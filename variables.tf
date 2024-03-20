@@ -25,7 +25,7 @@ variable "vm_size" {
 
 variable "virtual_network_name" {
   description = "The name of the virtual network."
-  default     = "storage_Vnet"
+  default     = "harnessVnet"
 }
 
 variable "storage_account_name" {
@@ -38,8 +38,4 @@ variable "container_name" {
 
 variable "blob_name" {
   description = "The name of the blob container."
-}
-
-variable "sas_token" {
-  description = "Shared Access Signature (SAS) token for accessing the storage account."
 }
