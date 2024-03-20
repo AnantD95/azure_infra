@@ -141,20 +141,6 @@ resource "azurerm_virtual_machine" "vm" {
  
 }
 
-# Create an Azure VM extension to run PowerShell script
-resource "azurerm_virtual_machine_extension" "script_extension" {
-  name                 = "install-iis"
-  virtual_machine_id   = azurerm_virtual_machine.vm.id
-  publisher            = "Microsoft.Compute"
-  type                 = "CustomScriptExtension"
-  type_handler_version = "1.10"
-
-  protected_settings = <<SETTINGS
-  {
-    "commandToExecute": "powershell -command \"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${base64encode(data.template_file.script.rendered)}')) | Out-File -filepath script.ps1\" && powershell -ExecutionPolicy Unrestricted -File script.ps1 -verb runas"
-  }
-  SETTINGS
-}
 
 data "template_file" "script" {
   template = "${file("script.ps1")}"
